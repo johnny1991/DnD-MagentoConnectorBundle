@@ -270,11 +270,17 @@ class CsvProductWriter extends CsvWriter
         $attributeEntity = $this->entityManager->getRepository('Pim\Bundle\CatalogBundle\Entity\Attribute');
         $attributes      = $attributeEntity->getNonIdentifierAttributes();
         foreach($attributes as $attribute){
-            if($attribute->getBackendType() == 'metric'){
-                if(array_key_exists($attribute->getCode(), $item)){
-                    $item[$attribute->getCode() . '-' . $this->getChannel()] = $item[$attribute->getCode()];
-                    unset($item[$attribute->getCode()]);
-                }
+            /** @var \Pim\Bundle\CatalogBundle\Entity\Attribute $attribute */
+
+            /**
+             * If it is a metric attribute, a scopable attribute and attribute exists in product item
+             */
+            if ($attribute->getBackendType() == 'metric'
+                && array_key_exists($attribute->getCode(), $item)
+                && $attribute->isScopable()
+            ) {
+                $item[$attribute->getCode() . '-' . $this->getChannel()] = $item[$attribute->getCode()];
+                unset($item[$attribute->getCode()]);
             }
         }
         return $item;
